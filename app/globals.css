@@ -120,3 +120,38 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities{
+
+  .gradient{
+      background-image: linear-gradient(to bottom, #1143cf, #e5e7eb 50%, #5612ca);
+  }
+  .gradient-title{
+    background-image: linear-gradient(to bottom, #1143cf, #e5e7eb 50%, #5612ca);
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    padding-bottom: 0.5rem;
+    padding-right: 0.5rem;
+     
+  }
+
+  .hero-image-wrapper {
+  perspective: 1000px;
+  overflow: hidden;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.hero-image{
+  transform: rotateX(15deg) scale(1);
+  transition: transform 0.5s ease-out;
+  will-change: transform;
+}
+
+.hero-image.scrolled{
+  transform: rotateX(0) scale(1) translateY(40px);
+}
+}
