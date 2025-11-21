@@ -7,7 +7,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { accountSchema } from "@/app/lib/schema";
@@ -21,6 +21,10 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "./ui/switch";
 import { Button } from "./ui/button";
+import useFetch from "@/hooks/use-fetch";
+import { createAccount } from "@/actions/dashboard";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export const CreateAccountDrawer = ({ children }) => {
   const [open, setOpen] = useState(false);
@@ -42,8 +46,31 @@ export const CreateAccountDrawer = ({ children }) => {
     },
   });
 
+  const {
+    data: newAccount,
+    error,
+    fn: createAccountFn,
+    loading: createAccountLoading,
+  } = useFetch(createAccount);
+
+  useEffect(() => {
+    return () => {
+      if (newAccount && !createAccountLoading) {
+        toast.success("Account created successfully!");
+        reset();
+        setOpen(false);
+      }
+    };
+  }, [createAccountLoading, newAccount]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(`Error: ${error.message}` || "An unexpected error occurred");
+    }
+  }, [error]);
+
   const onSubmit = async (data) => {
-    console.log("Form Data:", data);
+    await createAccountFn(data);
   };
 
   return (
@@ -76,6 +103,7 @@ export const CreateAccountDrawer = ({ children }) => {
                 <Select
                   onValueChange={(value) => setValue("type", value)}
                   defaultValue={watch("type")}
+                  {...register("type")}
                 >
                   <SelectTrigger id="type">
                     <SelectValue placeholder="Select Type" />
@@ -102,7 +130,9 @@ export const CreateAccountDrawer = ({ children }) => {
                   {...register("balance")}
                 />
                 {errors.balance && (
-                  <p className="text-sm text-red-600">{errors.name.message}</p>
+                  <p className="text-sm text-red-600">
+                    {errors.balance.message}
+                  </p>
                 )}
               </div>
 
@@ -133,8 +163,19 @@ export const CreateAccountDrawer = ({ children }) => {
                   </Button>
                 </DrawerClose>
 
-                <Button type="submit" className="ml-2 flex-1">
-                  Create Account
+                <Button
+                  type="submit"
+                  className="ml-2 flex-1"
+                  disabled={createAccountLoading}
+                >
+                  {createAccountLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    "Create Account"
+                  )}
                 </Button>
               </div>
             </form>
